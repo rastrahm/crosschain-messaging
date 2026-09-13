@@ -12,6 +12,7 @@
 | [GAS.md](./GAS.md) | Baseline ABI vs Yul + hot paths | ✅ |
 
 **Estado del módulo:** Fases **0–7** ✅ (v1 cerrado).  
-**Suite:** `forge test` → **81 PASS / 2 SKIP** (dual-fork sin RPC).
+**Suite verificada:** `forge test` → **81 PASS / 2 SKIP** (dual-fork sin `SRC_RPC_URL`/`DST_RPC_URL`).  
+**Sync docs:** 2026-09-13 (alineado a `src/` post Fase 7).
 
 README del módulo: [`../README.md`](../README.md).

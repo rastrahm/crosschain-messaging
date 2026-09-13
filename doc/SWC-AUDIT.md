@@ -17,7 +17,7 @@ OpenZeppelin Contracts v5.2.0 (`Ownable2Step`, `ReentrancyGuard`)
 
 **Mocks (fuera de prod):** `MockTransportAdapter`, `MockRelayer`, `MockMessageReceiver`, `MockLayerZeroEndpoint`, `MockCCIPRouter`, `RejectETH`  
 **Fecha:** 2026-09-13  
-**Referencia tests:** `test/*.t.sol`, `test/libraries/`, `test/adapters/`, `test/apps/`, `test/fork/`, `test/gas/`  
+**Referencia tests:** `test/*.t.sol`, `test/libraries/` (fuzz ≥ 1000), `test/adapters/`, `test/apps/`, `test/fork/`, `test/gas/`  
 **Índice docs:** [`README.md`](./README.md) · README módulo: [`../README.md`](../README.md)
 
 ---
