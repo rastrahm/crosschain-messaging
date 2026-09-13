@@ -1,0 +1,30 @@
+# .cursorrules — Module 16: Cross-Chain Messaging & Interoperability
+
+## MODULE OVERVIEW
+Focus on building cross-chain arbitrary message passing protocols, multi-chain state synchronization, and remote smart contract execution using LayerZero v2 / Chainlink CCIP standards with Foundry and Solidity 0.8.24.
+
+---
+
+## 1. TECHNICAL CONSTRAINTS & STACK
+
+- **Compiler Version:** Strictly `pragma solidity 0.8.24;` (no floating pragmas).
+- **Tooling:** Foundry (`forge` for multi-chain fork testing, gas tracking, and cross-chain message relay simulation).
+- **Standards:** LayerZero Endpoint V2 interfaces, Chainlink CCIP `IRouterClient`, and Custom Packet Formats (ABI-encoded payloads).
+
+---
+
+## 2. CODING & SECURITY RULES
+
+- **Reentrancy & Message Spoofing:** Strict verification of remote source chain ID (`srcChainId`) and source address (`srcAddress`). Revert on unknown senders (`error InvalidSourceSender()`).
+- **Gas Fee Estimation & Handling:** Native token fee calculation for cross-chain delivery (`quote` checks prior to dispatch). Any unused gas must be refunded safely to `msg.sender`.
+- **Idempotency & Payload Validation:** Enforce message hash tracking to prevent double-execution of cross-chain payloads (`mapping(bytes32 => bool) processedMessages`).
+- **Low-level Payload Encoding:** Use `abi.encode` / `abi.decode` for complex cross-chain calls (e.g., remote staking or cross-chain liquidity rebalancing).
+
+---
+
+## 3. TESTING REQUIREMENTS
+
+- **Foundry Multi-Fork Tests:** Simulate source chain dispatch and destination chain execution using dual fork environment or mock relayers.
+- **Unauthorized Sender Tests:** Assert failure when receiving valid payloads from unapproved cross-chain source contracts.
+- **Replay Protection Tests:** Verify that submitting the same message proof twice explicitly reverts.
+- **Gas Optimization Profiling:** Measure ABI decoding overhead vs custom Yul memory decoding.
