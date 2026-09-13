@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–3** ✅ · Fases **4–7** pendientes.  
+**Estado:** Fases **0–4** ✅ · Fases **5–7** pendientes.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -169,7 +169,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | 1 | Errors + libs (`PacketCodec`, `PeerLib`, `FeeRefundLib`) | ✅ Completada | ✅ Autorizada |
 | 2 | `CrossChainMessenger` + mock relayer (unit) | ✅ Completada | ✅ Autorizada |
 | 3 | Adapter LayerZero V2 + mocks | ✅ Completada | ✅ Autorizada |
-| 4 | Adapter Chainlink CCIP + mocks | ⏳ Pendiente | ❌ |
+| 4 | Adapter Chainlink CCIP + mocks | ✅ Completada | ✅ Autorizada |
 | 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ⏳ Pendiente | ❌ |
 | 6 | Dual-fork / multi-fork + `SimulateRelay` | ⏳ Pendiente | ❌ |
 | 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ⏳ Pendiente | ❌ |
@@ -263,7 +263,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 4 — Chainlink CCIP adapter
+### Fase 4 — Chainlink CCIP adapter ✅
 
 **Objetivo:** cablear transporte estilo `IRouterClient` con mock.
 
@@ -272,6 +272,13 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 3. Verificación de sender remoto contra `PeerRegistry` / peers del messenger.
 
 **Criterio de salida:** tests adapter CCIP + integración en verde.
+
+**Hecho (2026-09-13):**
+- `ICCIPRouter` + `EVM2AnyMessage` / `Any2EVMMessage` + `IAny2EVMMessageReceiver`.
+- `MockCCIPRouter`: fee fijo, `registerOApp`, cola `pending`, `deliver` / `deliverLast`.
+- `CCIPAdapter`: `quote`/`dispatch` (solo messenger), `ccipReceive` (solo router), `ccipPeers` por selector.
+- `test/adapters/CCIP.t.sol`: e2e send→deliver, auth router/messenger, spoof peer, replay.
+- **`forge test` → 55 PASS**.
 
 ---
 
