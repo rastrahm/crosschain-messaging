@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–2** ✅ · Fases **3–7** pendientes.  
+**Estado:** Fases **0–3** ✅ · Fases **4–7** pendientes.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -168,7 +168,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | 0 | Setup Foundry + estructura + deps | ✅ Completada | ✅ Autorizada |
 | 1 | Errors + libs (`PacketCodec`, `PeerLib`, `FeeRefundLib`) | ✅ Completada | ✅ Autorizada |
 | 2 | `CrossChainMessenger` + mock relayer (unit) | ✅ Completada | ✅ Autorizada |
-| 3 | Adapter LayerZero V2 + mocks | ⏳ Pendiente | ❌ |
+| 3 | Adapter LayerZero V2 + mocks | ✅ Completada | ✅ Autorizada |
 | 4 | Adapter Chainlink CCIP + mocks | ⏳ Pendiente | ❌ |
 | 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ⏳ Pendiente | ❌ |
 | 6 | Dual-fork / multi-fork + `SimulateRelay` | ⏳ Pendiente | ❌ |
@@ -244,7 +244,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 3 — LayerZero V2 adapter
+### Fase 3 — LayerZero V2 adapter ✅
 
 **Objetivo:** cablear transporte estilo Endpoint V2 con mock.
 
@@ -253,6 +253,13 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 3. Solo endpoint configurado puede invocar el path de recepción (`UnauthorizedCaller`).
 
 **Criterio de salida:** tests adapter LZ + integración con messenger en verde.
+
+**Hecho (2026-09-13):**
+- `ILayerZeroEndpointV2` + structs `Origin` / `MessagingParams` / `MessagingFee` / `MessagingReceipt` + `ILayerZeroReceiver`.
+- `MockLayerZeroEndpoint`: fee fijo, `registerOApp`, cola `pending`, `deliver` / `deliverLast`.
+- `LayerZeroV2Adapter`: `quote`/`dispatch` (solo messenger), `lzReceive` (solo endpoint), `lzPeers` por eid.
+- `test/adapters/LayerZeroV2.t.sol`: e2e send→deliver, auth endpoint/messenger, spoof LZ peer, replay.
+- **`forge test` → 47 PASS**.
 
 ---
 
