@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fase **0** ✅ · Fases **1–7** pendientes.  
+**Estado:** Fases **0–1** ✅ · Fases **2–7** pendientes.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -166,7 +166,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | Fase | Nombre | Estado | Autorización |
 |------|--------|--------|--------------|
 | 0 | Setup Foundry + estructura + deps | ✅ Completada | ✅ Autorizada |
-| 1 | Errors + libs (`PacketCodec`, `PeerLib`, `FeeRefundLib`) | ⏳ Pendiente | ❌ |
+| 1 | Errors + libs (`PacketCodec`, `PeerLib`, `FeeRefundLib`) | ✅ Completada | ✅ Autorizada |
 | 2 | `CrossChainMessenger` + mock relayer (unit) | ⏳ Pendiente | ❌ |
 | 3 | Adapter LayerZero V2 + mocks | ⏳ Pendiente | ❌ |
 | 4 | Adapter Chainlink CCIP + mocks | ⏳ Pendiente | ❌ |
@@ -200,7 +200,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 1 — Errors + libraries
+### Fase 1 — Errors + libraries ✅
 
 **Objetivo:** primitives de paquete, peers y refund.
 
@@ -210,6 +210,16 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 4. `MessagingErrors.sol` con todos los custom errors del §5.
 
 **Criterio de salida:** libs en verde; fuzz de encode/decode ≥ 1000 donde aplique.
+
+**Hecho (2026-09-13):**
+- `src/errors/MessagingErrors.sol` — 10 custom errors (incl. `InvalidSourceSender`).
+- `src/libraries/PacketCodec.sol` — `Packet`, `encode`/`decode` ABI, `messageHash`, `encodePacked` + `decodeYul`.
+- `src/libraries/PeerLib.sol` — pack/unpack, `requireNonZero`, `requireConfiguredPeer`, `requirePeer`.
+- `src/libraries/FeeRefundLib.sol` — `refundExcess` con `.call` + `InsufficientFee` / `EthRefundFailed`.
+- Mock `RejectETH`; harnesses en `test/helpers/LibHarnesses.sol`.
+- Tests: `PacketCodec.t.sol`, `PeerLib.t.sol`, `FeeRefundLib.t.sol` (fuzz 1000 c/u donde aplica).
+- Stub `Placeholder` eliminado.
+- **`forge test` → 27 PASS**.
 
 ---
 
