@@ -85,7 +85,7 @@ contract CCIPAdapter is ITransportAdapter, IAny2EVMMessageReceiver, Ownable2Step
 
         EVM2AnyMessage memory message = EVM2AnyMessage({
             receiver: abi.encode(remoteAdapter),
-            data: PacketCodec.encode(packet),
+            data: PacketCodec.encodePacked(packet),
             feeToken: address(0),
             extraArgs: defaultExtraArgs
         });
@@ -103,7 +103,7 @@ contract CCIPAdapter is ITransportAdapter, IAny2EVMMessageReceiver, Ownable2Step
             revert MessagingErrors.InvalidSourceSender();
         }
 
-        Packet memory packet = PacketCodec.decode(message.data);
+        Packet memory packet = PacketCodec.decodeYul(message.data);
         if (packet.srcChainId != message.sourceChainSelector) {
             revert MessagingErrors.InvalidSourceSender();
         }

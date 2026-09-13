@@ -1,17 +1,18 @@
 # Documentación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-Índice de diseño del módulo (AMP LayerZero v2 / Chainlink CCIP, sincronización multi-cadena, ejecución remota).
+Índice de diseño, seguridad y gas del módulo (AMP LayerZero v2 / Chainlink CCIP, sincronización multi-cadena, ejecución remota).
 
 | Archivo | Contenido | Estado |
 |---------|-----------|--------|
-| [planificacion.md](./planificacion.md) | Fases 0–7, arquitectura v1, criterios de aceptación | Fases 0–6 ✅ |
-| [diagrama-de-clases.md](./diagrama-de-clases.md) | UML: messenger, adapters LZ/CCIP, codec, peers | 📝 Diseño |
-| [diagrama-de-flujo.md](./diagrama-de-flujo.md) | Decisiones: quote → send → verify → execute | 📝 Diseño |
-| [flujograma.md](./flujograma.md) | E2E origen → relayer → destino + anti-replay | 📝 Diseño |
+| [planificacion.md](./planificacion.md) | Fases 0–7, arquitectura implementada, criterios | ✅ Cerrado |
+| [diagrama-de-clases.md](./diagrama-de-clases.md) | UML: messenger, adapters LZ/CCIP, codec, peers | ✅ Actualizado |
+| [diagrama-de-flujo.md](./diagrama-de-flujo.md) | Decisiones: quote → send → verify → execute | ✅ Actualizado |
+| [flujograma.md](./flujograma.md) | E2E origen → relayer → destino + anti-replay | ✅ Actualizado |
+| [SWC-AUDIT.md](./SWC-AUDIT.md) | Matriz SWC-100–136 (0 vulnerables) | ✅ |
+| [GAS.md](./GAS.md) | Baseline ABI vs Yul + hot paths | ✅ |
 
-**Estado del módulo:** Fases **0–6** ✅ · siguiente: Fase **7**.  
-**Regla:** no se escribe código de una fase hasta *“autorizo Fase N”*.
+**Estado del módulo:** Fases **0–7** ✅ (v1 cerrado).  
+**Suite verificada:** `forge test` → **81 PASS / 2 SKIP** (dual-fork sin `SRC_RPC_URL`/`DST_RPC_URL`).  
+**Sync docs:** 2026-09-13 (alineado a `src/` post Fase 7).
 
 README del módulo: [`../README.md`](../README.md).
-
-**Suite actual:** `forge test` → **70 PASS + 2 SKIP** (dual-fork sin RPC).

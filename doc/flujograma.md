@@ -1,19 +1,19 @@
 # Flujograma — Ciclo completo Cross-Chain Messaging
 
-Flujo extremo a extremo entre actores, messenger, adapters y relayer (módulo 16, **diseño v1**).
+Flujo extremo a extremo entre actores, messenger, adapters y relayer (módulo 16, **v1 implementado**).
 
 ## Actores
 
 | Actor | Rol |
 |-------|-----|
 | Usuario / dApp | Paga fee nativo; llama `send` con payload |
-| CrossChainMessenger (origen) | Quote, arma `Packet`, dispatch, refund |
-| Transport adapter (LZ / CCIP / mock) | Habla con endpoint o router |
+| CrossChainMessenger (origen) | Quote, arma `Packet`, dispatch, `refundExcessAssembly` |
+| Transport adapter (LZ / CCIP / mock) | Habla con endpoint/router; wire packed Yul en LZ/CCIP |
 | Relayer / MockRelayer / red LZ-CCIP | Entrega el mensaje a destino |
-| CrossChainMessenger (destino) | Verifica peer, anti-replay, ejecuta |
-| RemoteStakeReceiver | Aplica efecto de negocio del payload |
-| Admin / owner | Configura peers, adapters, ownership 2-step |
-| CI / Foundry | Unit, fuzz, dual-fork, gas ABI vs Yul |
+| CrossChainMessenger (destino) | Deliverer + peer + `messageHashCalldata` + anti-replay |
+| RemoteStakeReceiver | Aplica stake/unstake del payload |
+| Admin / owner | setPeer / setAdapter / setDeliverer / setReceiver |
+| CI / Foundry | Unit, fuzz libs, dual-fork skip, gas snapshot |
 
 ---
 
@@ -21,10 +21,11 @@ Flujo extremo a extremo entre actores, messenger, adapters y relayer (módulo 16
 
 ```mermaid
 flowchart TD
-    Start([Inicio]) --> Dep[Deploy.s.sol: messengers + adapters + mocks]
-    Dep --> Own[Ownable2Step en messenger / adapters]
-    Own --> Peer[setPeer: src ↔ dst addresses por chainId]
-    Peer --> Adapt[setAdapter LZ y/o CCIP]
+    Start([Inicio]) --> Dep[Deploy.s.sol: messengers + mock transport + relayer + stake]
+    Dep --> Own[Ownable2Step]
+    Own --> Peer[setPeer src ↔ dst]
+    Peer --> Del[setDeliverer MockRelayer o adapter]
+    Del --> Adapt[setAdapter mock; opcional LZ/CCIP cableados]
     Adapt --> Ready([Listo lab / fork / Anvil])
 ```
 
@@ -39,10 +40,10 @@ flowchart TD
     Fee -->|No| Abort[InsufficientFee]
     Fee -->|Sí| Send[send: Packet + nonce]
     Send --> Disp[adapter.dispatch]
-    Disp --> Ref[refundExcess a msg.sender]
+    Disp --> Ref[refundExcessAssembly a msg.sender]
     Ref --> Net[Red LZ / CCIP / MockRelayer]
-    Net --> Rec[adapter receive en destino]
-    Rec --> Auth{¿caller = endpoint/router?}
+    Net --> Rec[receive en destino: adapter o deliverer]
+    Rec --> Auth{¿caller autorizado?}
     Auth -->|No| U1[UnauthorizedCaller]
     Auth -->|Sí| Peer{¿srcAddress = peers srcChainId?}
     Peer -->|No| U2[InvalidSourceSender]
@@ -83,15 +84,16 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Mensaje entrante] --> B[1. Caller = transporte autorizado]
-    B --> C[2. Peer srcChainId / srcAddress]
-    C --> D[3. messageHash no procesado]
-    D --> E[4. Payload decodable]
-    E --> F[5. Efectos app + eventos]
+    A[Mensaje entrante] --> B[1. Caller = deliverer]
+    B --> C[2. dstChainId / dstAddress = local]
+    C --> D[3. Peer srcChainId / srcAddress]
+    D --> E[4. messageHash no procesado]
+    E --> F[5. Hook app opcional]
     B -.->|fail| X1[UnauthorizedCaller]
-    C -.->|fail| X2[InvalidSourceSender]
-    D -.->|fail| X3[MessageAlreadyProcessed]
-    E -.->|fail| X4[InvalidPayload]
+    C -.->|fail| X2[UnsupportedChain / InvalidPeer]
+    D -.->|fail| X3[InvalidSourceSender]
+    E -.->|fail| X4[MessageAlreadyProcessed]
+    F -.->|fail| X5[Errores app p.ej. ZeroAmount]
     F --> Ok([Éxito])
 ```
 
@@ -102,11 +104,11 @@ flowchart TD
 ```mermaid
 flowchart TD
     Start([msg.value en send]) --> Q[fee = quote]
-    Q --> Pay[adapter cobra fee]
+    Q --> Pay[adapter.dispatch value fee]
     Pay --> Diff[excess = msg.value - fee]
     Diff --> Z{¿excess > 0?}
     Z -->|No| Done([Sin refund])
-    Z -->|Sí| Call[.call value excess a refundTo]
+    Z -->|Sí| Call[Yul call value excess a msg.sender]
     Call --> Ok{¿success?}
     Ok -->|No| Err[EthRefundFailed]
     Ok -->|Sí| Done2([Refund OK])
@@ -125,7 +127,7 @@ flowchart TD
 | Peer incorrecto | `InvalidSourceSender` |
 | Mismo hash dos veces | `MessageAlreadyProcessed` |
 | `msg.value < fee` | `InsufficientFee` |
-| Caller no endpoint/router | `UnauthorizedCaller` |
+| Caller ≠ deliverer (o ≠ endpoint/router en adapter) | `UnauthorizedCaller` |
 | Receptor de refund rechaza ETH | `EthRefundFailed` (send revierte) |
 
 ---
@@ -134,4 +136,4 @@ flowchart TD
 
 - Estructura de tipos: [`diagrama-de-clases.md`](./diagrama-de-clases.md)
 - Decisiones internas detalladas: [`diagrama-de-flujo.md`](./diagrama-de-flujo.md)
-- Fases de implementación: [`planificacion.md`](./planificacion.md)
+- Fases / gas / SWC: [`planificacion.md`](./planificacion.md) · [`GAS.md`](./GAS.md) · [`SWC-AUDIT.md`](./SWC-AUDIT.md)

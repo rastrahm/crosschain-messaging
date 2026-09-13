@@ -1,7 +1,7 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–6** ✅ · Fase **7** pendiente.  
-**Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
+**Estado:** Fases **0–7** ✅ (módulo v1 cerrado).  
+**Nota:** La regla de autorización por fase aplicó durante la construcción; v1 ya no tiene fases pendientes.
 
 ---
 
@@ -23,14 +23,14 @@ Stack: **Foundry + Solidity `0.8.24`** (pragma fijo). Frontend Next.js queda **f
 
 | Incluido (v1) | Excluido (v1) |
 |---------------|---------------|
-| `CrossChainMessenger` — send / receive / execute payload | Bridge de tokens lock/mint (módulo 09) |
-| `PeerRegistry` — peers trusted por `eid` / `chainSelector` | Light client / SPV / zk proofs |
-| `PacketCodec` — encode/decode + hash idempotente | Relayer off-chain en producción |
+| `CrossChainMessenger` — send / receive / peers / idempotencia | Bridge de tokens lock/mint (módulo 09) |
+| Peers trusted on-chain (`peers[chainId]`) | Light client / SPV / zk proofs |
+| `PacketCodec` — ABI + packed Yul + `messageHash` | Relayer off-chain en producción |
 | Adapter LayerZero V2 (interfaces + mock endpoint) | DVN / Executor custom LZ en mainnet |
-| Adapter Chainlink CCIP (`IRouterClient` + mock router) | Token pools CCIP / fee tokens ERC-20 complejos |
+| Adapter Chainlink CCIP (`ICCIPRouter` + mock router) | Token pools CCIP / fee tokens ERC-20 complejos |
 | Demo app: `RemoteStakeReceiver` (stake remoto vía mensaje) | Frontend Next.js (App Router) |
-| Mock relayer dual-fork / in-process | Gobernanza DAO del set de peers |
-| Tests: unauthorized sender, replay, quote/refund, gas ABI vs Yul | Multi-hop routing automático |
+| `MockRelayer` + dual-fork / in-process | Gobernanza DAO del set de peers |
+| Tests: unauthorized, replay, quote/refund, gas ABI vs Yul | Multi-hop routing automático / `Messaging.fuzz.t.sol` dedicado |
 
 ---
 
@@ -42,18 +42,18 @@ Stack: **Foundry + Solidity `0.8.24`** (pragma fijo). Frontend Next.js queda **f
 - OpenZeppelin Contracts v5.x (`ReentrancyGuard`, `Ownable2Step`, `SafeERC20` si aplica).
 - Foundry: unit + fuzz (`runs >= 1000`) + multi-fork + gas reports.
 - **Custom errors** (no `require` con strings).
-- CEI estricto; ETH vía `.call{value: ...}("")` (nunca `transfer`/`send`).
+- CEI estricto; ETH vía `.call{value: ...}("")` o Yul `call` (nunca `transfer`/`send`).
 - NatSpec en toda API pública/externa.
 - Layout: Interfaces → Libraries → Contracts → State → Events → Errors → Modifiers → Functions.
 - TDD: tests primero en fases de contratos; cobertura de ramas de lógica explícita.
 
 ### Módulo 16 (`.cursorrules` local)
 
-- Estándares: LayerZero Endpoint V2, CCIP `IRouterClient`, paquetes ABI-encoded propios.
+- Estándares: LayerZero Endpoint V2, CCIP `IRouterClient`-like, paquetes propios (ABI + packed).
 - Spoofing: verificar `srcChainId` + `srcAddress`; revert `InvalidSourceSender()`.
-- Fees: `quote` antes de dispatch; refund seguro del ETH no usado a `msg.sender`.
+- Fees: `quote` antes de dispatch; refund seguro del ETH no usado a `msg.sender` (`refundExcessAssembly`).
 - Idempotencia: `mapping(bytes32 => bool) processedMessages`.
-- Payloads: `abi.encode` / `abi.decode` (y variante Yul documentada en gas).
+- Payloads: `abi.encode` / `abi.decode` app-side; wire adapters con `encodePacked` / `decodeYul`.
 
 ### Next.js (`nextjs.cursorrules`) — post-v1
 
@@ -62,7 +62,7 @@ Stack: **Foundry + Solidity `0.8.24`** (pragma fijo). Frontend Next.js queda **f
 
 ---
 
-## 4. Arquitectura (v1 propuesta)
+## 4. Arquitectura (v1 implementado)
 
 ```
 16-crosschain-messaging/
@@ -72,47 +72,52 @@ Stack: **Foundry + Solidity `0.8.24`** (pragma fijo). Frontend Next.js queda **f
 │   ├── planificacion.md
 │   ├── diagrama-de-clases.md
 │   ├── diagrama-de-flujo.md
-│   └── flujograma.md
+│   ├── flujograma.md
+│   ├── SWC-AUDIT.md
+│   └── GAS.md
 ├── src/
 │   ├── CrossChainMessenger.sol          # núcleo AMP + peers + idempotencia
 │   ├── apps/
 │   │   └── RemoteStakeReceiver.sol      # demo ejecución remota
 │   ├── adapters/
-│   │   ├── LayerZeroV2Adapter.sol
-│   │   └── CCIPAdapter.sol
+│   │   ├── LayerZeroV2Adapter.sol       # wire packed Yul
+│   │   └── CCIPAdapter.sol              # wire packed Yul
 │   ├── interfaces/
 │   │   ├── ICrossChainMessenger.sol
 │   │   ├── IMessageReceiver.sol
 │   │   ├── ITransportAdapter.sol
-│   │   ├── ILayerZeroEndpointV2.sol     # minimal / mockable
-│   │   └── ICCIPRouter.sol              # IRouterClient-like
+│   │   ├── ILayerZeroEndpointV2.sol     # + ILayerZeroReceiver
+│   │   └── ICCIPRouter.sol              # + IAny2EVMMessageReceiver
 │   ├── libraries/
-│   │   ├── PacketCodec.sol              # encode / decode / messageHash
-│   │   ├── PeerLib.sol                  # pack/unpack peer bytes32
-│   │   └── FeeRefundLib.sol             # refund ETH sobrante
+│   │   ├── PacketCodec.sol              # ABI + packed + messageHash(Calldata)
+│   │   ├── PeerLib.sol
+│   │   └── FeeRefundLib.sol             # refundExcess + refundExcessAssembly
 │   ├── errors/
 │   │   └── MessagingErrors.sol
 │   └── mocks/
+│       ├── MockTransportAdapter.sol
 │       ├── MockLayerZeroEndpoint.sol
 │       ├── MockCCIPRouter.sol
-│       └── MockRelayer.sol              # relay in-process / dual-fork helper
+│       ├── MockRelayer.sol
+│       ├── MockMessageReceiver.sol
+│       └── RejectETH.sol
 ├── test/
-│   ├── helpers/{MessagingTestBase,ForkHelper}.sol
-│   ├── libraries/{PacketCodec,FeeRefundLib}.t.sol
+│   ├── helpers/{MessagingTestBase,ForkHelper,LibHarnesses}.sol
+│   ├── libraries/{PacketCodec,PeerLib,FeeRefundLib}.t.sol
 │   ├── CrossChainMessenger.t.sol
 │   ├── UnauthorizedSender.t.sol
 │   ├── ReplayProtection.t.sol
 │   ├── adapters/{LayerZeroV2,CCIP}.t.sol
 │   ├── apps/RemoteStakeReceiver.t.sol
-│   ├── fuzz/Messaging.fuzz.t.sol
 │   ├── fork/DualFork.t.sol
-│   └── gas/Codec.gas.t.sol              # ABI vs Yul
+│   └── gas/Codec.gas.t.sol
 ├── script/
 │   ├── Deploy.s.sol
 │   └── SimulateRelay.s.sol
 ├── foundry.toml
 ├── remappings.txt
 ├── .env.example
+├── .gitignore
 └── .gas-snapshot
 ```
 
@@ -120,15 +125,16 @@ Stack: **Foundry + Solidity `0.8.24`** (pragma fijo). Frontend Next.js queda **f
 
 | Artefacto | Responsabilidad |
 |-----------|-----------------|
-| `CrossChainMessenger` | Quote, send, receive; peers; `processedMessages`; CEI + reentrancy |
-| `ITransportAdapter` | Abstracción LZ / CCIP / mock |
-| `LayerZeroV2Adapter` | Dispatch/receive vía Endpoint V2 (mock en tests) |
-| `CCIPAdapter` | Dispatch/receive vía `IRouterClient` (mock en tests) |
-| `PacketCodec` | Formato de paquete + `messageHash` idempotente |
-| `PeerLib` | Conversión address ↔ bytes32 / peer lookup |
-| `FeeRefundLib` | Refund ETH no consumido a `msg.sender` |
-| `RemoteStakeReceiver` | Ejecuta stake/unstake remoto desde payload decodificado |
-| `MockRelayer` | Simula entrega origen → destino en unit / dual-fork |
+| `CrossChainMessenger` | Quote, send, receive; peers; `processedMessages`; `_selfPeer`; CEI + reentrancy |
+| `ITransportAdapter` | Abstracción LZ / CCIP / mock transport |
+| `LayerZeroV2Adapter` | Dispatch/receive Endpoint V2; wire `encodePacked`/`decodeYul` |
+| `CCIPAdapter` | Dispatch/receive router CCIP; mismo wire packed |
+| `PacketCodec` | ABI + packed + `messageHash` / `messageHashCalldata` |
+| `PeerLib` | address↔bytes32; `requirePeer` / `requireConfiguredPeer` |
+| `FeeRefundLib` | `refundExcess` (`.call`) + `refundExcessAssembly` (Yul, send) |
+| `RemoteStakeReceiver` | Stake/unstake remoto desde payload decodificado |
+| `MockTransportAdapter` | Fee fijo + último packet (unit / dual-fork) |
+| `MockRelayer` | Entrega in-process a `receivePacket` |
 | `MessagingErrors` | Custom errors del módulo |
 
 ---
@@ -172,7 +178,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | 4 | Adapter Chainlink CCIP + mocks | ✅ Completada | ✅ Autorizada |
 | 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ✅ Completada | ✅ Autorizada |
 | 6 | Dual-fork / multi-fork + `SimulateRelay` | ✅ Completada | ✅ Autorizada |
-| 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ⏳ Pendiente | ❌ |
+| 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ✅ Completada | ✅ Autorizada |
 
 ---
 
@@ -269,7 +275,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 1. `MockCCIPRouter` + mensaje CCIP-like (selector, sender, data).
 2. Adapter: `ccipSend` / `ccipReceive` mockeados; fee quote + refund.
-3. Verificación de sender remoto contra `PeerRegistry` / peers del messenger.
+3. Verificación de sender remoto contra `ccipPeers` / peers del messenger.
 
 **Criterio de salida:** tests adapter CCIP + integración en verde.
 
@@ -322,7 +328,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 7 — Gas + Deploy + hardening
+### Fase 7 — Gas + Deploy + hardening ✅
 
 **Objetivo:** profiling y cierre v1.
 
@@ -333,18 +339,27 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 **Criterio de salida:** gas documentado; suite completa en verde; módulo v1 listo para cierre.
 
+**Hecho (2026-09-13):**
+- Optimizaciones: packed wire LZ/CCIP, `messageHashCalldata`, `_selfPeer` immutable, `refundExcessAssembly`, `encodePacked` Yul.
+- `test/gas/Codec.gas.t.sol` + `.gas-snapshot` (decodeYul −1040 vs ABI; refund Yul −64).
+- `script/Deploy.s.sol`: messengers + transports + relayer + stake + adapters LZ/CCIP.
+- `doc/GAS.md`, `doc/SWC-AUDIT.md` (matriz SWC-100–136, 0 vulnerables; alineado a módulo 15).
+- **`forge test` → 81 PASS + 2 SKIP**.
+
 ---
 
 ## 8. Formato de paquete (v1)
 
+### Struct lógico
+
 ```text
 Packet {
-  uint64  srcChainId;      // o eid / selector según adapter
+  uint64  srcChainId;      // eid / selector de laboratorio
   uint64  dstChainId;
   bytes32 srcAddress;      // peer origen (address left-padded)
   bytes32 dstAddress;      // peer destino
-  uint64  nonce;           // secuencia por ruta
-  bytes   payload;         // abi.encode(...) app-specific
+  uint64  nonce;           // secuencia por ruta (outboundNonces)
+  bytes   payload;         // app-specific (p. ej. abi.encode user,amount,isStake)
 }
 
 messageHash = keccak256(abi.encode(
@@ -352,29 +367,38 @@ messageHash = keccak256(abi.encode(
 ))
 ```
 
-`processedMessages[messageHash] = true` **antes** de efectos externos (CEI / idempotencia).
+`processedMessages[messageHash] = true` **antes** del hook `IMessageReceiver` (CEI / idempotencia).  
+En receive se usa `PacketCodec.messageHashCalldata`.
+
+### Wire adapters (LZ / CCIP) — packed 120 B + payload
+
+```text
+[0:8) srcChainId | [8:16) dstChainId | [16:48) srcAddress | [48:80) dstAddress
+| [80:88) nonce | [88:120) payloadLen | [120:) payload
+```
+
+`encodePacked` / `decodeYul` en adapters. ABI `encode`/`decode` queda para tests y portabilidad.
 
 ---
 
 ## 9. Criterios de aceptación globales (v1)
 
-- [ ] Pragma fijo `0.8.24` en todos los contratos.
-- [ ] `InvalidSourceSender` en receives no autorizados.
-- [ ] Anti-replay por `processedMessages`.
-- [ ] `quote` + refund de fee nativo.
-- [ ] Adapters LZ V2 y CCIP (mocks) integrados.
-- [ ] Demo `RemoteStakeReceiver` funcional.
-- [ ] Tests unauthorized + replay + dual-fork (o skip) + gas ABI vs Yul.
-- [ ] NatSpec + custom errors + CEI / ReentrancyGuard.
-- [ ] Documentación (`doc/`) alineada al código final.
+- [x] Pragma fijo `0.8.24` en todos los contratos.
+- [x] `InvalidSourceSender` en receives no autorizados.
+- [x] Anti-replay por `processedMessages`.
+- [x] `quote` + refund de fee nativo.
+- [x] Adapters LZ V2 y CCIP (mocks) integrados.
+- [x] Demo `RemoteStakeReceiver` funcional.
+- [x] Tests unauthorized + replay + dual-fork (o skip) + gas ABI vs Yul.
+- [x] NatSpec + custom errors + CEI / ReentrancyGuard.
+- [x] Documentación (`doc/`) alineada al código final.
+
+> **Módulo v1 cerrado.** Extensiones futuras: allowlist deliverer, fork LZ/CCIP real, stake ERC-20.
 
 ---
 
-## 10. Cómo autorizar la siguiente fase
+## 10. Estado post-v1
 
-Responde con una de estas formas (o equivalente claro):
+El módulo **v1 está cerrado** (fases 0–7). Extensiones (allowlist deliverer, fork LZ/CCIP real, stake ERC-20, fuzz dedicado) requieren nueva autorización de alcance.
 
-- `autorizo Fase 0`
-- `autorizo Fase N`
-
-Tras la autorización se implementa **solo** esa fase y se reporta checklist + archivos tocados.
+Suite de referencia: `forge test` → **81 PASS / 2 SKIP**.
