@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–1** ✅ · Fases **2–7** pendientes.  
+**Estado:** Fases **0–2** ✅ · Fases **3–7** pendientes.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -167,7 +167,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 |------|--------|--------|--------------|
 | 0 | Setup Foundry + estructura + deps | ✅ Completada | ✅ Autorizada |
 | 1 | Errors + libs (`PacketCodec`, `PeerLib`, `FeeRefundLib`) | ✅ Completada | ✅ Autorizada |
-| 2 | `CrossChainMessenger` + mock relayer (unit) | ⏳ Pendiente | ❌ |
+| 2 | `CrossChainMessenger` + mock relayer (unit) | ✅ Completada | ✅ Autorizada |
 | 3 | Adapter LayerZero V2 + mocks | ⏳ Pendiente | ❌ |
 | 4 | Adapter Chainlink CCIP + mocks | ⏳ Pendiente | ❌ |
 | 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ⏳ Pendiente | ❌ |
@@ -223,7 +223,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 2 — CrossChainMessenger + mock relayer
+### Fase 2 — CrossChainMessenger + mock relayer ✅
 
 **Objetivo:** núcleo AMP local sin LZ/CCIP reales.
 
@@ -233,6 +233,14 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 4. `MockRelayer` entrega in-process entre dos instancias (origen/destino).
 
 **Criterio de salida:** unit messenger + refund + peer check en verde.
+
+**Hecho (2026-09-13):**
+- Interfaces: `ICrossChainMessenger`, `IMessageReceiver`, `ITransportAdapter`.
+- `CrossChainMessenger`: Ownable2Step + ReentrancyGuard; peers; `processedMessages`; quote/send/receive; setPeer/Adapter/Deliverer/Receiver.
+- Mocks: `MockTransportAdapter` (fee fijo), `MockRelayer`, `MockMessageReceiver`.
+- `MessagingTestBase` dual-messenger in-process (CHAIN_A ↔ CHAIN_B).
+- `CrossChainMessenger.t.sol`: refund, relay e2e, unauthorized, spoof, replay, dst checks.
+- **`forge test` → 39 PASS**.
 
 ---
 
