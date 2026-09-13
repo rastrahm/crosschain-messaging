@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–4** ✅ · Fases **5–7** pendientes.  
+**Estado:** Fases **0–5** ✅ · Fases **6–7** pendientes.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -170,7 +170,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | 2 | `CrossChainMessenger` + mock relayer (unit) | ✅ Completada | ✅ Autorizada |
 | 3 | Adapter LayerZero V2 + mocks | ✅ Completada | ✅ Autorizada |
 | 4 | Adapter Chainlink CCIP + mocks | ✅ Completada | ✅ Autorizada |
-| 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ⏳ Pendiente | ❌ |
+| 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ✅ Completada | ✅ Autorizada |
 | 6 | Dual-fork / multi-fork + `SimulateRelay` | ⏳ Pendiente | ❌ |
 | 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ⏳ Pendiente | ❌ |
 
@@ -282,7 +282,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 5 — RemoteStakeReceiver + Unauthorized + Replay
+### Fase 5 — RemoteStakeReceiver + Unauthorized + Replay ✅
 
 **Objetivo:** demo de ejecución remota y matriz de seguridad del módulo.
 
@@ -293,6 +293,13 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | App | Payload stake remoto decodificado y aplicado una sola vez |
 
 **Criterio de salida:** `UnauthorizedSender.t.sol`, `ReplayProtection.t.sol`, app e2e en verde.
+
+**Hecho (2026-09-13):**
+- `RemoteStakeReceiver`: stake/unstake via `abi.encode(user, amount, isStake)`; solo `messenger`.
+- `UnauthorizedSender.t.sol`: spoof peer, chain sin peer, caller no deliverer.
+- `ReplayProtection.t.sol`: mismo packet/hash, nonces distintos OK.
+- `RemoteStakeReceiver.t.sol`: e2e stake/unstake, zero checks, no double-stake.
+- **`forge test` → 70 PASS**.
 
 ---
 
