@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–5** ✅ · Fases **6–7** pendientes.  
+**Estado:** Fases **0–6** ✅ · Fase **7** pendiente.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -171,7 +171,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | 3 | Adapter LayerZero V2 + mocks | ✅ Completada | ✅ Autorizada |
 | 4 | Adapter Chainlink CCIP + mocks | ✅ Completada | ✅ Autorizada |
 | 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ✅ Completada | ✅ Autorizada |
-| 6 | Dual-fork / multi-fork + `SimulateRelay` | ⏳ Pendiente | ❌ |
+| 6 | Dual-fork / multi-fork + `SimulateRelay` | ✅ Completada | ✅ Autorizada |
 | 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ⏳ Pendiente | ❌ |
 
 ---
@@ -303,7 +303,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 6 — Dual-fork + SimulateRelay
+### Fase 6 — Dual-fork + SimulateRelay ✅
 
 **Objetivo:** simular dispatch origen y ejecución destino con forks (o skip sin RPC).
 
@@ -312,6 +312,13 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 3. Skip limpio si faltan `SRC_RPC_URL` / `DST_RPC_URL`.
 
 **Criterio de salida:** fork pass opcional; script documentado.
+
+**Hecho (2026-09-13):**
+- `ForkHelper`: crea dual-fork desde `SRC_RPC_URL` / `DST_RPC_URL`; `_skipIfNoDualFork`.
+- `test/fork/DualFork.t.sol`: send en origen + stake en destino; replay en destino; **2 SKIP** sin RPC.
+- `script/SimulateRelay.s.sol`: simulación in-process send → relay → `RemoteStakeReceiver` (documentado).
+- `.env.example` actualizado (`STAKE_AMOUNT`).
+- **`forge test` → 70 PASS + 2 SKIP**. Script: `forge script script/SimulateRelay.s.sol:SimulateRelay -vvv` OK.
 
 ---
 

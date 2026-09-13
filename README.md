@@ -2,7 +2,7 @@
 
 Protocolo de arbitrary message passing (AMP) multi-cadena con adapters **LayerZero Endpoint V2** y **Chainlink CCIP**, peers trusted, anti-replay e idempotencia. Solidity `0.8.24` + Foundry.
 
-**Estado:** Fases **0–5** ✅ · Fases **6–7** pendientes de autorización.
+**Estado:** Fases **0–6** ✅ · Fase **7** pendiente de autorización.
 
 ## Docs
 
@@ -34,13 +34,19 @@ forge install foundry-rs/forge-std@v1.16.2 --no-git --shallow
 forge install OpenZeppelin/openzeppelin-contracts@v5.2.0 --no-git --shallow
 ```
 
-Dual-fork opcional (Fase 6):
+Dual-fork (Fase 6):
 
 ```bash
 # En `.env` (copiar desde `.env.example`)
 SRC_RPC_URL=https://...
 DST_RPC_URL=https://...
 forge test --match-path 'test/fork/*'
+```
+
+Simulación de relay (local):
+
+```bash
+forge script script/SimulateRelay.s.sol:SimulateRelay -vvv
 ```
 
 ## Deploy local

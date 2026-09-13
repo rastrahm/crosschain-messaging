@@ -4,14 +4,14 @@
 
 | Archivo | Contenido | Estado |
 |---------|-----------|--------|
-| [planificacion.md](./planificacion.md) | Fases 0–7, arquitectura v1, criterios de aceptación | Fases 0–5 ✅ |
+| [planificacion.md](./planificacion.md) | Fases 0–7, arquitectura v1, criterios de aceptación | Fases 0–6 ✅ |
 | [diagrama-de-clases.md](./diagrama-de-clases.md) | UML: messenger, adapters LZ/CCIP, codec, peers | 📝 Diseño |
 | [diagrama-de-flujo.md](./diagrama-de-flujo.md) | Decisiones: quote → send → verify → execute | 📝 Diseño |
 | [flujograma.md](./flujograma.md) | E2E origen → relayer → destino + anti-replay | 📝 Diseño |
 
-**Estado del módulo:** Fases **0–5** ✅ · siguiente: Fase **6**.  
+**Estado del módulo:** Fases **0–6** ✅ · siguiente: Fase **7**.  
 **Regla:** no se escribe código de una fase hasta *“autorizo Fase N”*.
 
 README del módulo: [`../README.md`](../README.md).
 
-**Suite actual:** `forge test` → **70 PASS**.
+**Suite actual:** `forge test` → **70 PASS + 2 SKIP** (dual-fork sin RPC).
