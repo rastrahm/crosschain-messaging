@@ -100,7 +100,7 @@ contract LayerZeroV2AdapterTest is Test {
             nonce: 1,
             payload: hex"01"
         });
-        bytes memory message = PacketCodec.encode(packet);
+        bytes memory message = PacketCodec.encodePacked(packet);
         Origin memory origin = Origin({
             srcEid: uint32(CHAIN_A),
             sender: PeerLib.addressToBytes32(address(adapterA)),
@@ -152,7 +152,7 @@ contract LayerZeroV2AdapterTest is Test {
 
         vm.prank(address(endpoint));
         vm.expectRevert(MessagingErrors.InvalidSourceSender.selector);
-        adapterB.lzReceive(origin, bytes32(uint256(1)), PacketCodec.encode(packet), address(0), "");
+        adapterB.lzReceive(origin, bytes32(uint256(1)), PacketCodec.encodePacked(packet), address(0), "");
     }
 
     function test_replayViaEndpoint_reverts() public {
@@ -188,6 +188,6 @@ contract LayerZeroV2AdapterTest is Test {
 
         vm.prank(address(endpoint));
         vm.expectRevert(MessagingErrors.MessageAlreadyProcessed.selector);
-        adapterB.lzReceive(origin, bytes32(uint256(2)), PacketCodec.encode(packet), address(0), "");
+        adapterB.lzReceive(origin, bytes32(uint256(2)), PacketCodec.encodePacked(packet), address(0), "");
     }
 }

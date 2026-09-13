@@ -18,18 +18,18 @@ struct Packet {
 
 /**
  * @title PacketCodec
- * @notice Encode/decode ABI, hash idempotente y decode packed en Yul.
- * @dev Canonical wire format: `abi.encode` de los campos del `Packet`.
- *      Packed (gas / Fase 7): header 120 B + payload
+ * @notice Encode/decode ABI, hash idempotente y wire packed en Yul (hot path).
+ * @dev Canonical ABI: portable / debug.
+ *      Packed (adapters LZ/CCIP v1): header 120 B + payload
  *      [0:8) srcChainId | [8:16) dstChainId | [16:48) srcAddress | [48:80) dstAddress
  *      | [80:88) nonce | [88:120) payloadLen | [120:) payload
- *      Tradeoff: ABI es portable; Yul packed evita overhead de decode dinamico en hot path.
+ *      Tradeoff: ABI mas claro; Yul packed menos gas en decode del receive path.
  */
 library PacketCodec {
     uint256 internal constant PACKED_HEADER_SIZE = 120;
 
     /**
-     * @notice Serializa un `Packet` con `abi.encode` (formato canonical).
+     * @notice Serializa un `Packet` con `abi.encode` (formato portable).
      * @param packet Paquete a serializar.
      * @return data Bytes ABI-encoded.
      */
@@ -71,7 +71,7 @@ library PacketCodec {
     }
 
     /**
-     * @notice Hash idempotente del mensaje (payload hasheado por separado).
+     * @notice Hash idempotente (memory). Preferir `messageHashCalldata` en receive.
      * @param packet Paquete a hashear.
      * @return hash Identificador unico para `processedMessages`.
      */
@@ -89,25 +89,56 @@ library PacketCodec {
     }
 
     /**
-     * @notice Empaqueta header+payload en layout fijo (perfil gas / `decodeYul`).
+     * @notice Hash desde calldata (evita copiar el struct a memory).
+     * @param packet Paquete en calldata.
+     * @return hash Identificador unico.
+     * @dev Hot path de `receivePacket`.
+     */
+    function messageHashCalldata(Packet calldata packet) internal pure returns (bytes32 hash) {
+        return keccak256(
+            abi.encode(
+                packet.srcChainId,
+                packet.dstChainId,
+                packet.srcAddress,
+                packet.dstAddress,
+                packet.nonce,
+                keccak256(packet.payload)
+            )
+        );
+    }
+
+    /**
+     * @notice Empaqueta header+payload en layout fijo (wire adapters / `decodeYul`).
      * @param packet Paquete a serializar.
      * @return data Bytes packed (120 + payload.length).
      */
     function encodePacked(Packet memory packet) internal pure returns (bytes memory data) {
         bytes memory payload = packet.payload;
-        data = bytes.concat(
-            bytes8(packet.srcChainId),
-            bytes8(packet.dstChainId),
-            packet.srcAddress,
-            packet.dstAddress,
-            bytes8(packet.nonce),
-            bytes32(payload.length),
-            payload
-        );
+        uint256 payloadLen = payload.length;
+        data = new bytes(PACKED_HEADER_SIZE + payloadLen);
+
+        uint64 srcChainId = packet.srcChainId;
+        uint64 dstChainId = packet.dstChainId;
+        bytes32 srcAddress = packet.srcAddress;
+        bytes32 dstAddress = packet.dstAddress;
+        uint64 nonce = packet.nonce;
+
+        assembly ("memory-safe") {
+            let dest := add(data, 0x20)
+            mstore(dest, shl(192, srcChainId))
+            mstore(add(dest, 8), shl(192, dstChainId))
+            mstore(add(dest, 16), srcAddress)
+            mstore(add(dest, 48), dstAddress)
+            mstore(add(dest, 80), shl(192, nonce))
+            mstore(add(dest, 88), payloadLen)
+            if payloadLen {
+                mcopy(add(dest, PACKED_HEADER_SIZE), add(payload, 0x20), payloadLen)
+            }
+        }
     }
 
     /**
-     * @notice Decodifica layout packed con Yul (hot path / gas profiling).
+     * @notice Decodifica layout packed con Yul (hot path adapters).
      * @param data Bytes de `encodePacked`.
      * @return packet Paquete decodificado.
      */

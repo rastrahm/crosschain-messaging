@@ -22,6 +22,10 @@ contract PacketCodecHarness {
         return PacketCodec.messageHash(packet);
     }
 
+    function messageHashCalldata(Packet calldata packet) external pure returns (bytes32) {
+        return PacketCodec.messageHashCalldata(packet);
+    }
+
     function encodePacked(Packet memory packet) external pure returns (bytes memory) {
         return PacketCodec.encodePacked(packet);
     }
@@ -64,6 +68,10 @@ contract PeerLibHarness {
 contract FeeRefundLibHarness {
     function refundExcess(address refundTo, uint256 fee) external payable {
         FeeRefundLib.refundExcess(refundTo, fee);
+    }
+
+    function refundExcessAssembly(address refundTo, uint256 fee) external payable {
+        FeeRefundLib.refundExcessAssembly(refundTo, fee);
     }
 
     receive() external payable {}

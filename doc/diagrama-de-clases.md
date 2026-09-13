@@ -1,6 +1,6 @@
 # Diagrama de clases — Cross-Chain Messaging & Interoperability
 
-Vista estructural de contratos, adapters, librerías e interfaces (módulo 16, **diseño v1**).
+Vista estructural de contratos, adapters, librerías e interfaces (módulo 16, **v1 implementado**).
 
 ## Diagrama (Mermaid)
 

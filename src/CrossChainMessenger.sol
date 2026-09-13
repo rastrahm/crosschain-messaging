@@ -16,11 +16,15 @@ import {FeeRefundLib} from "./libraries/FeeRefundLib.sol";
  * @title CrossChainMessenger
  * @notice Nucleo AMP: peers trusted, quote/send, receive idempotente y hook de app.
  * @dev CEI + `ReentrancyGuard`. Solo `deliverer` puede llamar `receivePacket`.
- *      El fee se paga al `adapter`; el sobrante se refund a `msg.sender`.
+ *      El fee se paga al `adapter`; el sobrante se refund con Yul a `msg.sender`.
+ *      Hot path: `_selfPeer` immutable, `messageHashCalldata`, `refundExcessAssembly`.
  */
 contract CrossChainMessenger is ICrossChainMessenger, Ownable2Step, ReentrancyGuard {
     /// @inheritdoc ICrossChainMessenger
     uint64 public immutable override localChainId;
+
+    /// @notice Peer bytes32 de esta instancia (evita recalcular en cada receive/send).
+    bytes32 private immutable _selfPeer;
 
     /// @notice Adapter de transporte actual.
     ITransportAdapter public adapter;
@@ -68,6 +72,7 @@ contract CrossChainMessenger is ICrossChainMessenger, Ownable2Step, ReentrancyGu
     constructor(uint64 localChainId_, address owner_) Ownable(owner_) {
         PeerLib.requireNonZero(owner_);
         localChainId = localChainId_;
+        _selfPeer = PeerLib.addressToBytes32(address(this));
     }
 
     /// @inheritdoc ICrossChainMessenger
@@ -103,7 +108,7 @@ contract CrossChainMessenger is ICrossChainMessenger, Ownable2Step, ReentrancyGu
         Packet memory packet = Packet({
             srcChainId: localChainId,
             dstChainId: dstChainId,
-            srcAddress: PeerLib.addressToBytes32(address(this)),
+            srcAddress: _selfPeer,
             dstAddress: dstPeer,
             nonce: nonce,
             payload: payload
@@ -111,9 +116,8 @@ contract CrossChainMessenger is ICrossChainMessenger, Ownable2Step, ReentrancyGu
 
         messageHash = PacketCodec.messageHash(packet);
 
-        // Effects before external adapter call: nonce already incremented.
         adapter_.dispatch{value: fee}(dstChainId, packet, msg.sender);
-        FeeRefundLib.refundExcess(msg.sender, fee);
+        FeeRefundLib.refundExcessAssembly(msg.sender, fee);
 
         emit MessageSent(messageHash, dstChainId, nonce, payload);
     }
@@ -122,13 +126,11 @@ contract CrossChainMessenger is ICrossChainMessenger, Ownable2Step, ReentrancyGu
     function receivePacket(Packet calldata packet) external override nonReentrant {
         if (msg.sender != deliverer) revert MessagingErrors.UnauthorizedCaller();
         if (packet.dstChainId != localChainId) revert MessagingErrors.UnsupportedChain();
-        if (packet.dstAddress != PeerLib.addressToBytes32(address(this))) {
-            revert MessagingErrors.InvalidPeer();
-        }
+        if (packet.dstAddress != _selfPeer) revert MessagingErrors.InvalidPeer();
 
         PeerLib.requirePeer(peers[packet.srcChainId], packet.srcAddress);
 
-        bytes32 messageHash = PacketCodec.messageHash(packet);
+        bytes32 messageHash = PacketCodec.messageHashCalldata(packet);
         if (processedMessages[messageHash]) revert MessagingErrors.MessageAlreadyProcessed();
 
         // Effects

@@ -92,7 +92,7 @@ contract LayerZeroV2Adapter is ITransportAdapter, ILayerZeroReceiver, Ownable2St
         bytes32 remoteAdapter = lzPeers[dstChainId];
         if (remoteAdapter == bytes32(0)) revert MessagingErrors.UnsupportedChain();
 
-        bytes memory message = PacketCodec.encode(packet);
+        bytes memory message = PacketCodec.encodePacked(packet);
         MessagingParams memory params = MessagingParams({
             dstEid: uint32(dstChainId),
             receiver: remoteAdapter,
@@ -120,7 +120,7 @@ contract LayerZeroV2Adapter is ITransportAdapter, ILayerZeroReceiver, Ownable2St
             revert MessagingErrors.InvalidSourceSender();
         }
 
-        Packet memory packet = PacketCodec.decode(message);
+        Packet memory packet = PacketCodec.decodeYul(message);
         if (uint64(origin.srcEid) != packet.srcChainId) {
             revert MessagingErrors.InvalidSourceSender();
         }

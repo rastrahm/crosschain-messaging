@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–6** ✅ · Fase **7** pendiente.  
+**Estado:** Fases **0–7** ✅ (módulo v1 cerrado).  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -172,7 +172,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 | 4 | Adapter Chainlink CCIP + mocks | ✅ Completada | ✅ Autorizada |
 | 5 | `RemoteStakeReceiver` + Unauthorized + Replay | ✅ Completada | ✅ Autorizada |
 | 6 | Dual-fork / multi-fork + `SimulateRelay` | ✅ Completada | ✅ Autorizada |
-| 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ⏳ Pendiente | ❌ |
+| 7 | Gas ABI vs Yul + Deploy + NatSpec / SWC | ✅ Completada | ✅ Autorizada |
 
 ---
 
@@ -322,7 +322,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ---
 
-### Fase 7 — Gas + Deploy + hardening
+### Fase 7 — Gas + Deploy + hardening ✅
 
 **Objetivo:** profiling y cierre v1.
 
@@ -332,6 +332,13 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 4. Actualizar diagramas / planificación a “implementado”.
 
 **Criterio de salida:** gas documentado; suite completa en verde; módulo v1 listo para cierre.
+
+**Hecho (2026-09-13):**
+- Optimizaciones: packed wire LZ/CCIP, `messageHashCalldata`, `_selfPeer` immutable, `refundExcessAssembly`, `encodePacked` Yul.
+- `test/gas/Codec.gas.t.sol` + `.gas-snapshot` (decodeYul −1040 vs ABI; refund Yul −64).
+- `script/Deploy.s.sol`: messengers + transports + relayer + stake + adapters LZ/CCIP.
+- `doc/GAS.md`, `doc/SWC-AUDIT.md` (matriz SWC-100–136, 0 vulnerables; alineado a módulo 15).
+- **`forge test` → 81 PASS + 2 SKIP**.
 
 ---
 
@@ -358,15 +365,17 @@ messageHash = keccak256(abi.encode(
 
 ## 9. Criterios de aceptación globales (v1)
 
-- [ ] Pragma fijo `0.8.24` en todos los contratos.
-- [ ] `InvalidSourceSender` en receives no autorizados.
-- [ ] Anti-replay por `processedMessages`.
-- [ ] `quote` + refund de fee nativo.
-- [ ] Adapters LZ V2 y CCIP (mocks) integrados.
-- [ ] Demo `RemoteStakeReceiver` funcional.
-- [ ] Tests unauthorized + replay + dual-fork (o skip) + gas ABI vs Yul.
-- [ ] NatSpec + custom errors + CEI / ReentrancyGuard.
-- [ ] Documentación (`doc/`) alineada al código final.
+- [x] Pragma fijo `0.8.24` en todos los contratos.
+- [x] `InvalidSourceSender` en receives no autorizados.
+- [x] Anti-replay por `processedMessages`.
+- [x] `quote` + refund de fee nativo.
+- [x] Adapters LZ V2 y CCIP (mocks) integrados.
+- [x] Demo `RemoteStakeReceiver` funcional.
+- [x] Tests unauthorized + replay + dual-fork (o skip) + gas ABI vs Yul.
+- [x] NatSpec + custom errors + CEI / ReentrancyGuard.
+- [x] Documentación (`doc/`) alineada al código final.
+
+> **Módulo v1 cerrado.** Extensiones futuras: allowlist deliverer, fork LZ/CCIP real, stake ERC-20.
 
 ---
 

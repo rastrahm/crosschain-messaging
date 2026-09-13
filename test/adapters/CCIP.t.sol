@@ -103,7 +103,7 @@ contract CCIPAdapterTest is Test {
             messageId: bytes32(uint256(1)),
             sourceChainSelector: CHAIN_A,
             sender: abi.encode(address(adapterA)),
-            data: PacketCodec.encode(packet)
+            data: PacketCodec.encodePacked(packet)
         });
 
         vm.prank(user);
@@ -145,7 +145,7 @@ contract CCIPAdapterTest is Test {
             messageId: bytes32(uint256(1)),
             sourceChainSelector: CHAIN_A,
             sender: abi.encode(makeAddr("evilAdapter")),
-            data: PacketCodec.encode(packet)
+            data: PacketCodec.encodePacked(packet)
         });
 
         vm.prank(address(router));
@@ -180,7 +180,7 @@ contract CCIPAdapterTest is Test {
             messageId: bytes32(uint256(2)),
             sourceChainSelector: CHAIN_A,
             sender: abi.encode(address(adapterA)),
-            data: PacketCodec.encode(packet)
+            data: PacketCodec.encodePacked(packet)
         });
 
         vm.prank(address(router));

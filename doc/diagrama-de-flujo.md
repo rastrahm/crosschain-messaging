@@ -1,6 +1,6 @@
 # Diagrama de flujo — Quote, send, verify y execute
 
-Flujos de decisión internos del messenger y adapters (módulo 16, **diseño v1**).
+Flujos de decisión internos del messenger y adapters (módulo 16, **v1 implementado**).
 
 ## 1. quoteSend + send (cadena origen)
 

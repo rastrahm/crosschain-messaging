@@ -2,7 +2,7 @@
 
 Protocolo de arbitrary message passing (AMP) multi-cadena con adapters **LayerZero Endpoint V2** y **Chainlink CCIP**, peers trusted, anti-replay e idempotencia. Solidity `0.8.24` + Foundry.
 
-**Estado:** Fases **0–6** ✅ · Fase **7** pendiente de autorización.
+**Estado:** Fases **0–7** ✅ (módulo v1 cerrado).
 
 ## Docs
 

@@ -55,6 +55,18 @@ contract FeeRefundLibTest is Test {
         harness.refundExcess{value: 2 ether}(address(rejector), 1 ether);
     }
 
+    function test_refundExcessAssembly_refundsDifference() public {
+        harness.refundExcessAssembly{value: 3 ether}(recipient, 1 ether);
+        assertEq(recipient.balance, 2 ether);
+        assertEq(address(harness).balance, 1 ether);
+    }
+
+    function test_refundExcessAssembly_revertsWhenRecipientRejects() public {
+        RejectETH rejector = new RejectETH();
+        vm.expectRevert(MessagingErrors.EthRefundFailed.selector);
+        harness.refundExcessAssembly{value: 2 ether}(address(rejector), 1 ether);
+    }
+
     function testFuzz_refundExcess(uint96 valueSent, uint96 fee) public {
         valueSent = uint96(bound(valueSent, 0, 50 ether));
         fee = uint96(bound(fee, 0, 50 ether));

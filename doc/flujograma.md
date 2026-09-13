@@ -1,6 +1,6 @@
 # Flujograma — Ciclo completo Cross-Chain Messaging
 
-Flujo extremo a extremo entre actores, messenger, adapters y relayer (módulo 16, **diseño v1**).
+Flujo extremo a extremo entre actores, messenger, adapters y relayer (módulo 16, **v1 implementado**).
 
 ## Actores
 
