@@ -1,6 +1,6 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
-**Estado:** Fases **0–7** pendientes.  
+**Estado:** Fase **0** ✅ · Fases **1–7** pendientes.  
 **Regla de avance:** cada fase requiere **autorización explícita** del responsable antes de empezar (*“autorizo Fase N”* o equivalente).
 
 ---
@@ -165,7 +165,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 | Fase | Nombre | Estado | Autorización |
 |------|--------|--------|--------------|
-| 0 | Setup Foundry + estructura + deps | ⏳ Pendiente | ❌ |
+| 0 | Setup Foundry + estructura + deps | ✅ Completada | ✅ Autorizada |
 | 1 | Errors + libs (`PacketCodec`, `PeerLib`, `FeeRefundLib`) | ⏳ Pendiente | ❌ |
 | 2 | `CrossChainMessenger` + mock relayer (unit) | ⏳ Pendiente | ❌ |
 | 3 | Adapter LayerZero V2 + mocks | ⏳ Pendiente | ❌ |
@@ -178,7 +178,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 ## 7. Detalle por fase
 
-### Fase 0 — Setup Foundry
+### Fase 0 — Setup Foundry ✅
 
 **Objetivo:** repo compilable alineado a la suite.
 
@@ -188,6 +188,15 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 4. Stub mínimo + smoke test; `.env.example` (RPCs origen/destino); `README.md`.
 
 **Criterio de salida:** `forge build` y `forge test` en verde.
+
+**Hecho (2026-09-13):**
+- `foundry.toml` (solc `0.8.24`, Cancun, optimizer `10_000`, `via_ir`, fuzz `runs = 1000`, RPC `mainnet` / `src` / `dst`).
+- `remappings.txt`: `forge-std/`, `@openzeppelin/contracts/`.
+- Dependencias en `lib/` (gitignored): `forge-std` **v1.16.2**, OpenZeppelin **v5.2.0** (copiadas del módulo 15).
+- Carpetas `src/{adapters,apps,interfaces,libraries,errors,mocks}`, `test/{helpers,fuzz,fork,gas,adapters,apps}`, `script/`.
+- Stub `src/Placeholder.sol` + `test/Placeholder.t.sol` (ping + remapping IERC20).
+- Stub `script/Deploy.s.sol` (Fase 7), `.env.example`, `README.md`, `doc/` ya existente.
+- `forge build` OK; `forge test` → **2 PASS**.
 
 ---
 
