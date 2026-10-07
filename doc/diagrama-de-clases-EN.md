@@ -1,8 +1,10 @@
-# Diagrama de clases — Cross-Chain Messaging & Interoperability
+# Class diagram — Cross-Chain Messaging & Interoperability
 
-Vista estructural de contratos, adapters, librerías e interfaces (módulo 16, **v1 implementado**).
+**Language:** English · [Español](./diagrama-de-clases-ES.md)
 
-## Diagrama (Mermaid)
+Structural view of contracts, adapters, libraries, and interfaces (module 16, **v1 implemented**).
+
+## Diagram (Mermaid)
 
 ```mermaid
 classDiagram
@@ -213,24 +215,24 @@ classDiagram
 
 ---
 
-## Relaciones clave
+## Key relationships
 
-| Relación | Descripción |
-|----------|-------------|
-| Messenger → Adapter | Núcleo solo ve `ITransportAdapter` (mock / LZ / CCIP) |
-| Adapter → Endpoint/Router | Solo endpoint/router puede `lzReceive` / `ccipReceive` |
-| Messenger → deliverer | Solo `deliverer` llama `receivePacket` |
+| Relationship | Description |
+|--------------|-------------|
+| Messenger → Adapter | The core only sees `ITransportAdapter` (mock / LZ / CCIP) |
+| Adapter → Endpoint/Router | Only the endpoint/router can call `lzReceive` / `ccipReceive` |
+| Messenger → deliverer | Only the `deliverer` calls `receivePacket` |
 | Messenger → PeerLib | `srcAddress` == `peers[srcChainId]` |
-| Messenger → PacketCodec | `messageHash` / `messageHashCalldata` para idempotencia |
-| Messenger → FeeRefundLib | Tras `dispatch`, `refundExcessAssembly(msg.sender, fee)` |
-| Adapters → PacketCodec | Wire packed (`encodePacked` / `decodeYul`) |
-| Receiver app | `RemoteStakeReceiver` confía en messenger ya autenticado |
+| Messenger → PacketCodec | `messageHash` / `messageHashCalldata` for idempotency |
+| Messenger → FeeRefundLib | After `dispatch`, `refundExcessAssembly(msg.sender, fee)` |
+| Adapters → PacketCodec | Packed wire (`encodePacked` / `decodeYul`) |
+| Receiver app | `RemoteStakeReceiver` trusts the already-authenticated messenger |
 
 ---
 
-## Notas de diseño
+## Design notes
 
-- `Ownable2Step` + `ReentrancyGuard` en messenger y adapters.
-- `_selfPeer` immutable evita recalcular `addressToBytes32(this)` en cada tx.
-- Marcar `processedMessages[hash]` **antes** de `IMessageReceiver` (CEI).
-- Suite: **81 PASS / 2 SKIP** (dual-fork sin RPC). Ver [`GAS.md`](./GAS.md) y [`SWC-AUDIT.md`](./SWC-AUDIT.md).
+- `Ownable2Step` + `ReentrancyGuard` on the messenger and adapters.
+- Immutable `_selfPeer` avoids recomputing `addressToBytes32(this)` on every tx.
+- Mark `processedMessages[hash]` **before** `IMessageReceiver` (CEI).
+- Suite: **81 PASS / 2 SKIP** (dual-fork without RPC). See [`GAS-EN.md`](./GAS-EN.md) and [`SWC-AUDIT-EN.md`](./SWC-AUDIT-EN.md).

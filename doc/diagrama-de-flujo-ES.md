@@ -1,5 +1,7 @@
 # Diagrama de flujo — Quote, send, verify y execute
 
+**Idioma:** Español · [English](./diagrama-de-flujo-EN.md)
+
 Flujos de decisión internos del messenger y adapters (módulo 16, **v1 implementado**).
 
 ## 1. quoteSend + send (cadena origen)
@@ -27,7 +29,7 @@ flowchart TD
     K --> Ok([Fin — OK])
 ```
 
-> Producción: `refundExcessAssembly` (Yul). Tests comparan vs `refundExcess` (`.call`) — ver [`GAS.md`](./GAS.md).
+> Producción: `refundExcessAssembly` (Yul). Tests comparan vs `refundExcess` (`.call`) — ver [`GAS-ES.md`](./GAS-ES.md).
 
 ---
 

@@ -1,5 +1,7 @@
 # Planificación — Módulo 16: Cross-Chain Messaging & Interoperability
 
+**Idioma:** Español · [English](./planificacion-EN.md)
+
 **Estado:** Fases **0–7** ✅ (módulo v1 cerrado).  
 **Nota:** La regla de autorización por fase aplicó durante la construcción; v1 ya no tiene fases pendientes.
 
@@ -66,15 +68,16 @@ Stack: **Foundry + Solidity `0.8.24`** (pragma fijo). Frontend Next.js queda **f
 
 ```
 16-crosschain-messaging/
-├── README.md
+├── README-ES.md / README-EN.md
 ├── doc/
-│   ├── README.md
-│   ├── planificacion.md
-│   ├── diagrama-de-clases.md
-│   ├── diagrama-de-flujo.md
-│   ├── flujograma.md
-│   ├── SWC-AUDIT.md
-│   └── GAS.md
+│   ├── README-{ES,EN}.md
+│   ├── planificacion-{ES,EN}.md
+│   ├── diagrama-de-clases-{ES,EN}.md
+│   ├── diagrama-de-flujo-{ES,EN}.md
+│   ├── flujograma-{ES,EN}.md
+│   ├── SWC-AUDIT-{ES,EN}.md
+│   ├── GAS-{ES,EN}.md
+│   └── DECISIONES-Y-LOGICA-{ES,EN}.md
 ├── src/
 │   ├── CrossChainMessenger.sol          # núcleo AMP + peers + idempotencia
 │   ├── apps/
@@ -191,7 +194,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 1. Scaffold Foundry (`foundry.toml`: solc `0.8.24`, optimizer, fuzz `runs >= 1000`, `[rpc_endpoints]` para forks).
 2. Dependencias: `forge-std`, OpenZeppelin v5; stubs/interfaces mínimas LZ V2 y CCIP (sin SDK completo si no hace falta).
 3. Carpetas `src/{adapters,apps,interfaces,libraries,errors,mocks}`, `test/{helpers,fuzz,fork,gas,adapters,apps}`, `script/`, `doc/`.
-4. Stub mínimo + smoke test; `.env.example` (RPCs origen/destino); `README.md`.
+4. Stub mínimo + smoke test; `.env.example` (RPCs origen/destino); `README-ES.md`.
 
 **Criterio de salida:** `forge build` y `forge test` en verde.
 
@@ -201,7 +204,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 - Dependencias en `lib/` (gitignored): `forge-std` **v1.16.2**, OpenZeppelin **v5.2.0** (copiadas del módulo 15).
 - Carpetas `src/{adapters,apps,interfaces,libraries,errors,mocks}`, `test/{helpers,fuzz,fork,gas,adapters,apps}`, `script/`.
 - Stub `src/Placeholder.sol` + `test/Placeholder.t.sol` (ping + remapping IERC20).
-- Stub `script/Deploy.s.sol` (Fase 7), `.env.example`, `README.md`, `doc/` ya existente.
+- Stub `script/Deploy.s.sol` (Fase 7), `.env.example`, `README-ES.md`, `doc/` ya existente.
 - `forge build` OK; `forge test` → **2 PASS**.
 
 ---
@@ -332,9 +335,9 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 
 **Objetivo:** profiling y cierre v1.
 
-1. `Codec.gas.t.sol`: ABI decode vs Yul memory decode; snapshot en `.gas-snapshot` / `doc/GAS.md`.
+1. `Codec.gas.t.sol`: ABI decode vs Yul memory decode; snapshot en `.gas-snapshot` / `doc/GAS-ES.md`.
 2. `Deploy.s.sol` + NatSpec completo.
-3. `doc/SWC-AUDIT.md` (matriz SWC relevante a messaging).
+3. `doc/SWC-AUDIT-ES.md` (matriz SWC relevante a messaging).
 4. Actualizar diagramas / planificación a “implementado”.
 
 **Criterio de salida:** gas documentado; suite completa en verde; módulo v1 listo para cierre.
@@ -343,7 +346,7 @@ Obligatorio del módulo: `InvalidSourceSender()`. El resto soporta fees, peers e
 - Optimizaciones: packed wire LZ/CCIP, `messageHashCalldata`, `_selfPeer` immutable, `refundExcessAssembly`, `encodePacked` Yul.
 - `test/gas/Codec.gas.t.sol` + `.gas-snapshot` (decodeYul −1040 vs ABI; refund Yul −64).
 - `script/Deploy.s.sol`: messengers + transports + relayer + stake + adapters LZ/CCIP.
-- `doc/GAS.md`, `doc/SWC-AUDIT.md` (matriz SWC-100–136, 0 vulnerables; alineado a módulo 15).
+- `doc/GAS-ES.md`, `doc/SWC-AUDIT-ES.md` (matriz SWC-100–136, 0 vulnerables; alineado a módulo 15).
 - **`forge test` → 81 PASS + 2 SKIP**.
 
 ---
