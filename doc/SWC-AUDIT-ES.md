@@ -1,5 +1,7 @@
 # Auditoría SWC — Cross-Chain Messaging & Interoperability
 
+**Idioma:** Español · [English](./SWC-AUDIT-EN.md)
+
 Verificación del protocolo AMP contra el [SWC Registry](https://swcregistry.io/) (EIP-1470) y principios del monorepo (custom errors, pragma fijo, CEI, ReentrancyGuard, refund ETH seguro, anti-replay). Estilo alineado a [`15-mev-hft-infra/doc/SWC-AUDIT.md`](../../15-mev-hft-infra/doc/SWC-AUDIT.md).
 
 > **Nota:** El SWC Registry no se mantiene activamente desde ~2020. Complementar con [SCSVS](https://github.com/ComposableSecurity/SCSVS) y [EEA EthTrust](https://entethalliance.org/specs/ethtrust/).
@@ -18,7 +20,7 @@ OpenZeppelin Contracts v5.2.0 (`Ownable2Step`, `ReentrancyGuard`)
 **Mocks (fuera de prod):** `MockTransportAdapter`, `MockRelayer`, `MockMessageReceiver`, `MockLayerZeroEndpoint`, `MockCCIPRouter`, `RejectETH`  
 **Fecha:** 2026-09-13  
 **Referencia tests:** `test/*.t.sol`, `test/libraries/` (fuzz ≥ 1000), `test/adapters/`, `test/apps/`, `test/fork/`, `test/gas/`  
-**Índice docs:** [`README.md`](./README.md) · README módulo: [`../README.md`](../README.md)
+**Índice docs:** [`README-ES.md`](./README-ES.md) · README módulo: [`../README-ES.md`](../README-ES.md)
 
 ---
 
@@ -45,7 +47,7 @@ OpenZeppelin Contracts v5.2.0 (`Ownable2Step`, `ReentrancyGuard`)
 | Quote + refund a `msg.sender` | ✅ |
 | Fuzz ≥ 1000 runs | ✅ `foundry.toml` + libs |
 | Dual-fork opcional + SimulateRelay | ✅ Fase 6 |
-| Gas ABI vs Yul | ✅ `doc/GAS.md` |
+| Gas ABI vs Yul | ✅ `doc/GAS-ES.md` |
 
 ---
 
@@ -129,7 +131,7 @@ v1 confía en `deliverer` (mock relayer o adapter) y en que endpoint/router solo
 | Fuzz ≥ 1000 | ✅ | PacketCodec / PeerLib / FeeRefund |
 | Unauthorized + Replay | ✅ | Fases 2–5 |
 | Sin floating pragma | ✅ | `0.8.24` |
-| Gas ABI vs Yul | ✅ | `doc/GAS.md` |
+| Gas ABI vs Yul | ✅ | `doc/GAS-ES.md` |
 
 ---
 
@@ -154,7 +156,7 @@ v1 confía en `deliverer` (mock relayer o adapter) y en que endpoint/router solo
 | 3 | `refundExcessAssembly` | Hot path send |
 | 4 | `script/Deploy.s.sol` completo | Deploy local reproducible |
 | 5 | `test/gas/Codec.gas.t.sol` + `.gas-snapshot` | Baseline ABI vs Yul |
-| 6 | `doc/SWC-AUDIT.md` / `doc/GAS.md` | Matriz SWC-100–136 + benchmarks |
+| 6 | `doc/SWC-AUDIT-ES.md` / `doc/GAS-ES.md` | Matriz SWC-100–136 + benchmarks |
 
 ### Observaciones no bloqueantes (v2)
 
@@ -211,5 +213,5 @@ Gas snapshot (`.gas-snapshot`): decodeYul **30 829** vs ABI **31 869**; refu
 - [SWC Registry](https://swcregistry.io/)
 - [EIP-1470](https://eips.ethereum.org/EIPS/eip-1470)
 - Módulo 15: [`15-mev-hft-infra/doc/SWC-AUDIT.md`](../../15-mev-hft-infra/doc/SWC-AUDIT.md)
-- Gas: [`GAS.md`](./GAS.md)
-- Plan: [`planificacion.md`](./planificacion.md)
+- Gas: [`GAS-ES.md`](./GAS-ES.md)
+- Plan: [`planificacion-ES.md`](./planificacion-ES.md)

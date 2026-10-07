@@ -1,5 +1,7 @@
 # Optimización de gas — Cross-Chain Messaging & Interoperability
 
+**Idioma:** Español · [English](./GAS-EN.md)
+
 Regenerar:
 
 ```bash
@@ -71,4 +73,4 @@ Env: `PRIVATE_KEY`, `FEE_WEI`, `CHAIN_A`, `CHAIN_B`. Ver `script/Deploy.s.sol` y
 
 Sim relay: `forge script script/SimulateRelay.s.sol:SimulateRelay -vvv`
 
-README: [`../README.md`](../README.md) · Índice docs: [`README.md`](./README.md) · SWC: [`SWC-AUDIT.md`](./SWC-AUDIT.md)
+README: [`../README-ES.md`](../README-ES.md) · Índice docs: [`README-ES.md`](./README-ES.md) · SWC: [`SWC-AUDIT-ES.md`](./SWC-AUDIT-ES.md)

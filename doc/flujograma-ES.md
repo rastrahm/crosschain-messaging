@@ -1,5 +1,7 @@
 # Flujograma — Ciclo completo Cross-Chain Messaging
 
+**Idioma:** Español · [English](./flujograma-EN.md)
+
 Flujo extremo a extremo entre actores, messenger, adapters y relayer (módulo 16, **v1 implementado**).
 
 ## Actores
@@ -134,6 +136,6 @@ flowchart TD
 
 ## Relación con otros diagramas
 
-- Estructura de tipos: [`diagrama-de-clases.md`](./diagrama-de-clases.md)
-- Decisiones internas detalladas: [`diagrama-de-flujo.md`](./diagrama-de-flujo.md)
-- Fases / gas / SWC: [`planificacion.md`](./planificacion.md) · [`GAS.md`](./GAS.md) · [`SWC-AUDIT.md`](./SWC-AUDIT.md)
+- Estructura de tipos: [`diagrama-de-clases-ES.md`](./diagrama-de-clases-ES.md)
+- Decisiones internas detalladas: [`diagrama-de-flujo-ES.md`](./diagrama-de-flujo-ES.md)
+- Fases / gas / SWC: [`planificacion-ES.md`](./planificacion-ES.md) · [`GAS-ES.md`](./GAS-ES.md) · [`SWC-AUDIT-ES.md`](./SWC-AUDIT-ES.md)

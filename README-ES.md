@@ -1,5 +1,7 @@
 # 16 — Cross-Chain Messaging & Interoperability
 
+**Idioma:** Español · [English](./README-EN.md)
+
 Protocolo de arbitrary message passing (AMP) multi-cadena con adapters **LayerZero Endpoint V2** y **Chainlink CCIP**, peers trusted, anti-replay e idempotencia. Solidity `0.8.24` + Foundry.
 
 **Estado:** Fases **0–7** ✅ (módulo v1 cerrado).  
@@ -9,13 +11,14 @@ Protocolo de arbitrary message passing (AMP) multi-cadena con adapters **LayerZe
 
 | Archivo | Contenido |
 |---------|-----------|
-| [`doc/README.md`](./doc/README.md) | Índice |
-| [`doc/planificacion.md`](./doc/planificacion.md) | Fases, arquitectura, criterios |
-| [`doc/diagrama-de-clases.md`](./doc/diagrama-de-clases.md) | UML |
-| [`doc/diagrama-de-flujo.md`](./doc/diagrama-de-flujo.md) | Decisiones send/receive |
-| [`doc/flujograma.md`](./doc/flujograma.md) | E2E + dual-fork |
-| [`doc/SWC-AUDIT.md`](./doc/SWC-AUDIT.md) | Matriz SWC-100–136 |
-| [`doc/GAS.md`](./doc/GAS.md) | ABI vs Yul + hot paths |
+| [`doc/README-ES.md`](./doc/README-ES.md) | Índice |
+| [`doc/planificacion-ES.md`](./doc/planificacion-ES.md) | Fases, arquitectura, criterios |
+| [`doc/diagrama-de-clases-ES.md`](./doc/diagrama-de-clases-ES.md) | UML |
+| [`doc/diagrama-de-flujo-ES.md`](./doc/diagrama-de-flujo-ES.md) | Decisiones send/receive |
+| [`doc/flujograma-ES.md`](./doc/flujograma-ES.md) | E2E + dual-fork |
+| [`doc/SWC-AUDIT-ES.md`](./doc/SWC-AUDIT-ES.md) | Matriz SWC-100–136 |
+| [`doc/GAS-ES.md`](./doc/GAS-ES.md) | ABI vs Yul + hot paths |
+| [`doc/DECISIONES-Y-LOGICA-ES.md`](./doc/DECISIONES-Y-LOGICA-ES.md) | Decisiones, lógica y mejoras de gas |
 
 ## Stack
 
